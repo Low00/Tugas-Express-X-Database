@@ -53,4 +53,29 @@ const createProduct = async (req, res) => {
   }
 };
 
-module.exports = { getAllProducts, getProductById, createProduct };
+const updateProduct = async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (!isValidId(body.id)) {
+      return res.status(400).json({ message: 'id (angka bulat positif) wajib diisi di body' });
+    }
+    if (!isValidBody(body)) {
+      return res
+        .status(400)
+        .json({ message: 'name (string) dan price (angka bulat >= 0) wajib diisi' });
+    }
+    const updated = await prisma.product.update({
+      where: { id: body.id },
+      data: { name: body.name.trim(), price: body.price },
+    });
+    res.status(200).json(updated);
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'Produk tidak ditemukan' });
+    }
+    console.error(err);
+    res.status(500).json({ message: 'Terjadi kesalahan pada server' });
+  }
+};
+
+module.exports = { getAllProducts, getProductById, createProduct, updateProduct };
