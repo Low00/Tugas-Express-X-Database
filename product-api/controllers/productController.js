@@ -78,4 +78,21 @@ const updateProduct = async (req, res) => {
   }
 };
 
-module.exports = { getAllProducts, getProductById, createProduct, updateProduct };
+const deleteProduct = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!isValidId(id)) {
+      return res.status(400).json({ message: 'id harus berupa angka bulat positif' });
+    }
+    const deleted = await prisma.product.delete({ where: { id } });
+    res.status(200).json({ message: 'Produk berhasil dihapus', data: deleted });
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'Produk tidak ditemukan' });
+    }
+    console.error(err);
+    res.status(500).json({ message: 'Terjadi kesalahan pada server' });
+  }
+};
+
+module.exports = { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct };
